@@ -63,7 +63,7 @@ with col2:
 
 if source_language and translation_language and source_language != translation_language:
     # Set up the translator for French to English
-    translator = GoogleTranslator(source='fr', target='en')
+    translator = GoogleTranslator(source=language_choices[source_language], target=language_choices[translation_language])
 else:
     st.warning("Choisissez une langue de traduction différente de la langue source")
 # Function to translate text within a specific tag and update progress
