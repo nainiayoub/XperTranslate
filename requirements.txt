@@ -1,3 +1,6 @@
 deep_translator
 htbuilder
+networkx
+pyvis
+scikit_learn
 streamlit
