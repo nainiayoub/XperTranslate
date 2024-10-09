@@ -73,7 +73,22 @@ if source_language and translation_language and source_language != translation_l
     # Set up the translator for French to English
     translator = GoogleTranslator(source=language_choices[source_language], target=language_choices[translation_language])
 else:
-    st.warning("Choisissez une langue de traduction différente de la langue source")
+    # Updated text with emojis and bullet points for better readability
+    updatedText = """
+    :arrows_counterclockwise: **Mise à jour : 09/10/2024**  - Ajout de nouvelles langues de traduction :  
+    - 🇵🇹 **Portugais**  
+    - 🇩🇪 **Allemand**  
+    - 🇻🇳 **Vietnamien**  
+    - 🇨🇳 **Chinois (simplifié)**  
+    - 🇹🇼 **Chinois (traditionnel)**
+    """
+
+    # Display a warning message
+    st.warning("Choisissez une langue de traduction différente de la langue source.")
+
+    # Display the update info
+    st.info(updatedText)
+	
 # Function to translate text within a specific tag and update progress
 def translate_text(root, tag_name, progress_bar, progress_step):
     tags = root.findall(f".//{tag_name}")
