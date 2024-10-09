@@ -54,7 +54,15 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-language_choices = {'Français': 'fr', 'Anglais': 'en', 'Espagnol': 'es'}
+language_choices = {'Français': 'fr',
+                    'Anglais': 'en', 
+                    'Espagnol': 'es', 
+                    'Portugais': 'pt',
+                    'Allemand': 'de', 
+                    'Vietnamien': 'vi',
+                    'Chinois (simplifié)': 'zh-CN',
+                    'Chinois (traditionnel)': 'zh-TW'}
+
 col1, col2 = st.columns(2)
 with col1:
     source_language = st.selectbox('Langue source', list(language_choices.keys()))
