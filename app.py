@@ -2,10 +2,11 @@ import streamlit as st
 import xml.etree.ElementTree as ET
 from deep_translator import GoogleTranslator
 from io import BytesIO
+import base64
 import time  # Import time module to measure duration
-from functions import footer, link, image
+from functions import footer, link, image, plot_interactive_graph, create_graph, calculate_similarity, parse_xml
 
-st.set_page_config(page_title="XperTranslate")
+st.set_page_config(layout="wide", page_title="XperTranslate")
 html_temp = """
                     <div style="background-color:{};padding:1px">
                     
@@ -35,7 +36,7 @@ st.markdown(hide, unsafe_allow_html=True)
 
 
 
-st.markdown("<h1 style='text-align: center'><span style='color: #8dc32f'>Xper</span>Translate for <a href='https://xper3.fr/en/' style='color: #8dc32f; text-decoration: none'>Xper3</a></h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center'><span style='color: #8dc32f'>Xper</span>Translate</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center'> Importer votre base de connaissances <a href='https://xper3.fr/en/' style='color: #8dc32f; text-decoration: none;font-weight: bold;'>Xper3</a> pour traduction. </p>", unsafe_allow_html=True)
 
 footer()
@@ -54,41 +55,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-language_choices = {'Français': 'fr',
-                    'Anglais': 'en', 
-                    'Espagnol': 'es', 
-                    'Portugais': 'pt',
-                    'Allemand': 'de', 
-                    'Vietnamien': 'vi',
-                    'Chinois (simplifié)': 'zh-CN',
-                    'Chinois (traditionnel)': 'zh-TW'}
 
-col1, col2 = st.columns(2)
-with col1:
-    source_language = st.selectbox('Langue source', list(language_choices.keys()))
-with col2:
-    translation_language = st.selectbox('Langue de traduction:', list(language_choices.keys()), index=None, placeholder="Choisir la langue de traduction")
 
-if source_language and translation_language and source_language != translation_language:
-    # Set up the translator for French to English
-    translator = GoogleTranslator(source=language_choices[source_language], target=language_choices[translation_language])
-else:
-    # Updated text with emojis and bullet points for better readability
-    updatedText = """
-    :arrows_counterclockwise: **Mise à jour : 09/10/2024**  - Ajout de nouvelles langues de traduction :  
-    - 🇵🇹 **Portugais**  
-    - 🇩🇪 **Allemand**  
-    - 🇻🇳 **Vietnamien**  
-    - 🇨🇳 **Chinois (simplifié)**  
-    - 🇹🇼 **Chinois (traditionnel)**
-    """
 
-    # Display a warning message
-    st.warning("Choisissez une langue de traduction différente de la langue source.")
-
-    # Display the update info
-    st.info(updatedText)
-	
 # Function to translate text within a specific tag and update progress
 def translate_text(root, tag_name, progress_bar, progress_step):
     tags = root.findall(f".//{tag_name}")
@@ -183,6 +152,64 @@ with st.sidebar:
             # Process the file and translate content only when the button is clicked
             msg = "Translated"
 
+
+language_choices = {'Français': 'fr',
+                    'Anglais': 'en', 
+                    'Espagnol': 'es', 
+                    'Portugais': 'pt',
+                    'Allemand': 'de', 
+                    'Vietnamien': 'vi',
+                    'Chinois (simplifié)': 'zh-CN',
+                    'Chinois (traditionnel)': 'zh-TW'}
+                    
+col1, col2 = st.columns(2)
+with col1:
+    source_language = st.selectbox('Langue source', list(language_choices.keys()))
+with col2:
+    translation_language = st.selectbox('Langue de traduction:', list(language_choices.keys()), index=None, placeholder="Choisir la langue de traduction")
+
+if source_language and translation_language and source_language != translation_language:
+    # Set up the translator for French to English
+    translator = GoogleTranslator(source=language_choices[source_language], target=language_choices[translation_language])
+else:
+    # Updated text with emojis and bullet points for better readability
+    updatedText = """
+    * Ajout d'un graphique de similarité de nœuds
+    * Ajout de nouvelles langues de traduction :  
+        * 🇵🇹 **Portugais**  
+        * 🇩🇪 **Allemand**  
+        * 🇻🇳 **Vietnamien**  
+        * 🇨🇳 **Chinois (simplifié)**  
+        * 🇹🇼 **Chinois (traditionnel)**
+    
+    """
+
+    # Display a warning message
+    st.warning("Choisissez une langue de traduction différente de la langue source.")
+
+    # Display the update info
+    with st.expander(":arrows_counterclockwise: Mise à jour : 09/10/2024"):
+        st.info(updatedText)
+
+    # with st.expander("Graphe de similarité de nœuds"):
+    if uploaded_file is not None:
+        file_content = uploaded_file.read()
+        species_data = parse_xml(file_content)
+
+        with st.sidebar:
+            threshold = st.slider("Seuil de similarité", min_value=0.0, max_value=1.0, value=0.5, step=0.05)
+
+        species_ids, similarity_matrix = calculate_similarity(species_data)
+        G = create_graph(species_ids, similarity_matrix, species_data, threshold)
+        html_string = plot_interactive_graph(G)
+
+        # Embed HTML in Streamlit
+        st.components.v1.html(html_string, height=600)
+
+        # Provide download link for the HTML file
+        b64 = base64.b64encode(html_string.encode()).decode()
+        href = f'<a href="data:text/html;base64,{b64}" download="species_graph.html">Download HTML File</a>'
+        st.markdown(href, unsafe_allow_html=True) 
       
 if msg: 
     translated_xml, translation_time = process_xml(uploaded_file)
@@ -201,4 +228,3 @@ if msg:
             mime="text/xml"
         )
 
-           
