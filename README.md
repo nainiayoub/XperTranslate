@@ -1,2 +1,2 @@
 # XperTranslate
-A tool to translate Xper3 knowledge bases to French, Anglish, and Spanich
+A tool to graphically visualize and translate Xper3 knowledge bases to many languages.
